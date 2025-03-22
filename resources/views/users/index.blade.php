@@ -4,76 +4,303 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Usuarios</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            font-family: 'Arial', sans-serif;
+            padding-top: 70px;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #c40000, #9e0000); /* Rojo más intenso */
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+            text-shadow: none; /* Sin neón en el texto "Usuarios" */
+        }
+
+        .container {
+            margin-top: 40px; /* Ajustado para que el título no esté tan abajo */
+        }
+
+        h3 {
+            color: #333;
+            font-size: 2.5rem;
+            font-weight: bold;
             text-align: center;
-            margin: 0;
-            padding: 20px;
+            margin-bottom: 30px;
         }
-        table {
-            width: 80%;
-            margin: 20px auto;
-            border-collapse: collapse;
-            background: white;
+
+        .form-control {
+            border-radius: 25px;
+            border: 1px solid #ccc;
+            padding: 10px 20px;
+            margin-bottom: 20px;
         }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-        }
-        th {
-            background: #333;
-            color: white;
-        }
+
         .btn {
-            display: inline-block;
-            padding: 8px 12px;
-            text-decoration: none;
-            color: white;
-            background: #28a745;
+            border-radius: 25px;
+            padding: 8px 16px; /* Botones más pequeños */
             margin: 5px;
+            font-size: 1rem; /* Texto más pequeño */
+            transition: all 0.3s ease-in-out;
+            color: white; /* Texto blanco */
+        }
+
+        .btn-primary {
+            background: #c40000; /* Rojo más intenso */
+            border: none;
+            
+        }
+
+        .btn-primary:hover {
+            background: #9e0000;
+            box-shadow: 0px 0px 20px rgba(255, 0, 0, 0.8); /* Neón más notorio */
+            transform: scale(1.05);
+            color: black; /* Texto en negro al pasar el cursor */
+        }
+
+        .btn-info {
+            background: black;
+            border: none;
+            
+        }
+
+        .btn-info:hover {
+            background: black;
+            box-shadow: 0px 0px 20px black; /* Neón más notorio */
+            transform: scale(1.05);
+            color: white; /* Texto en negro al pasar el cursor */
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            border: none;
+            
+        }
+
+        .btn-warning:hover {
+            background: #e67e22;
+            box-shadow: 0px 0px 20px rgba(243, 156, 18, 0.8); /* Neón más notorio */
+            transform: scale(1.05);
+            color: black; /* Texto en negro al pasar el cursor */
+        }
+
+        .btn-danger {
+            background: #c40000; /* Rojo más intenso */
+            border: none;
+           
+        }
+
+        .btn-danger:hover {
+            background: #9e0000;
+            box-shadow: 0px 0px 20px rgba(192, 57, 43, 0.8); /* Neón más notorio */
+            transform: scale(1.05);
+            color: black; /* Texto en negro al pasar el cursor */
+        }
+
+        .btn-success {
+            background: #28a745; /* Botón verde */
+            border: none;
+            
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            box-shadow: 0px 0px 20px rgba(40, 167, 69, 0.8); /* Neón más notorio */
+            transform: scale(1.05);
+            color: black; /* Texto en negro al pasar el cursor */
+        }
+
+        table {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+
+        table thead {
+            background: linear-gradient(135deg, #c40000, #9e0000); /* Rojo más intenso */
+            color: white;
+            font-weight: bold;
+        }
+
+        table th, table td {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .pagination .page-item .page-link {
+            color: #d63031;
+            border-radius: 30px;
+            margin: 0 5px;
+            transition: all 0.3s ease-in-out;
+            padding: 10px 20px;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #c40000;
+            color: white;
+            border: none;
+        }
+
+        .pagination .page-item .page-link:hover {
+            background-color: #9e0000;
+            color: white;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            pointer-events: none;
+            background-color: #e9ecef;
+        }
+
+        .alert {
+            margin-top: 20px;
+            padding: 15px;
             border-radius: 5px;
         }
-        .btn-danger {
-            background: #dc3545;
+
+        .alert-success {
+            background-color: #28a745;
+            color: white;
         }
+
+        .alert-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .import-form {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Centrar el contenido */
+            gap: 10px; /* Espacio entre los elementos */
+            width: 100%;
+            max-width: 400px; /* Ajustar el tamaño */
+            margin: 0 auto; /* Centrar en la pantalla */
+        }
+
+        .import-form .input-container,
+        .import-form .button-container {
+            flex: 1; /* Mitad del espacio */
+        }
+
+        .import-form .input-container input {
+            width: 100%; 
+            margin-bottom: 2px; 
+        }
+
+        .import-form .button-container button {
+            width: 100%;
+            
+        }
+
     </style>
 </head>
 <body>
-    @if(session('success'))
-    <p style="color: green;">{{ session('success') }}</p>
-    @endif
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{{ route('users.index') }}">Usuarios</a>
+            </div>
+        </nav>
+        
+        @if(session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
 
-    @if(session('error'))
-        <p style="color: red;">{{ session('error') }}</p>
-    @endif
-    <h2>Lista de Usuarios</h2>
-    <a href="{{ route('users.create') }}" class="btn">Nuevo Usuario</a>
-    <table>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Rol</th>
-            <th>Acciones</th>
-        </tr>
-        @foreach($users as $user)
-        <tr>
-            <td>{{ $user['id'] }}</td>
-            <td>{{ $user['nombre'] }} {{ $user['apellidos'] }}</td>
-            <td>{{ $user['email'] }}</td>
-            <td>{{ $user['rol'] }}</td>
-            <td>
-                <a href="{{ route('users.edit', $user['id']) }}" class="btn">Editar</a>
-                <form action="{{ route('users.destroy', $user['id']) }}" method="POST" style="display:inline;">
+        @if(session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if(session('import_result'))
+            <div class="alert alert-info">
+                {{ session('import_result') }}
+                @if(session('import_errors'))
+                    <ul class="mt-2">
+                        @foreach(session('import_errors') as $error)
+                            <li class="small text-danger">{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
+        @endif
+        <h3>Lista de Usuarios</h3>
+
+        <div class="d-flex justify-content-between">
+            <form method="GET" action="{{ route('users.index') }}" class="d-flex align-items-center">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Buscar usuario..." class="form-control mb-3" style="width: 250px;">
+                <button type="submit" class="btn btn-primary btn-sm mb-3">Buscar</button>
+            </form>
+
+            <div>
+                <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm mb-3">Nuevo Usuario</a>
+                <a href="{{ route('users.grafica') }}" class="btn btn-success btn-sm mb-3">Gráfica</a>
+                <a href="{{ route('users.exportPdf', request()->query()) }}" target="_blank" class="btn btn-info btn-sm mb-3">Descargar PDF</a> 
+                <a href="{{ route('users.exportExcel', request()->query()) }}" class="btn btn-info btn-sm mb-3">Descargar Excel</a>
+                <form action="{{ route('users.importExcel') }}" method="POST" enctype="multipart/form-data" class="import-form">
                     @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                    <div class="input-container">
+                        <input type="file" name="file" required class="form-control form-control-sm">
+                    </div>
+                    <div class="button-container">
+                        <button type="submit" class="btn btn-secondary btn-sm">Importar</button>
+                    </div>
                 </form>
-            </td>
-        </tr>
-        @endforeach
-    </table>
+                
+                
+            </div>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($users as $user)
+                    <tr>
+                        <td>{{ $user['_id'] }}</td>
+                        <td>{{ $user['nombre'] }} {{ $user['apellidos'] }}</td>
+                        <td>{{ $user['email'] }}</td>
+                        <td>{{ $user['rol'] }}</td>
+                        <td>
+                            <a href="{{ route('users.edit', $user['_id']) }}" class="btn btn-warning btn-sm">Editar</a>
+                            <form action="{{ route('users.destroy', $user['_id']) }}" method="POST" style="display:inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+
+        <!-- Paginación -->
+        <div class="d-flex justify-content-center mt-3">
+            {{ $users->links('pagination::bootstrap-4') }}
+        </div>
+    </div>
 </body>
 </html>

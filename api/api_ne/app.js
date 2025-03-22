@@ -1,11 +1,15 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+const connectDB = require('./db');
 const routes = require('./routes');
+
+// Conectar a MongoDB
+connectDB();
 
 app.use(bodyParser.json());
 
-// Middleware para configurar las cabeceras CORS
+// Configurar CORS (igual que antes)
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
@@ -13,11 +17,10 @@ app.use((req, res, next) => {
   next();
 });
 
-// Rutas de la API
+// Rutas
 app.use('/api', routes);
 
-// Puerto
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Servidor API a la espera de consulta, por el puerto ${PORT}`);
+  console.log(`Servidor API en el puerto ${PORT}`);
 });

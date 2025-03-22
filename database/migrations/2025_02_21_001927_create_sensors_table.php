@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('sensors', function (Blueprint $table) {
             $table->id();
             $table->string('ubicacion');
-            $table->enum('tipo', ['humo', 'temperatura', 'gas']);
+            $table->string('tipo');
             $table->boolean('activo')->default(true);
             $table->timestamps();
         });

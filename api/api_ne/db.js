@@ -1,18 +1,13 @@
-const mysql = require('mysql');
+const mongoose = require('mongoose');
 
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'psycowax'
-});
-
-connection.connect((err) => {
-  if (err) {
-    console.error('Error de conexión a la base de datos:', err);
-    return;
+const connectDB = async () => {
+  try {
+    await mongoose.connect('mongodb://localhost:27017/psycowax');
+    console.log('✅ Conexión a MongoDB exitosa');
+  } catch (err) {
+    console.error('❌ Error de conexión a MongoDB:', err.message);
+    process.exit(1);
   }
-  console.log('Conexión a la base de datos exitosa');
-});
+};
 
-module.exports = connection;
+module.exports = connectDB;
