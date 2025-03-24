@@ -209,6 +209,7 @@
 <body>
     <div class="container">
         <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+            <a href="{{ route('home')}}" class="btn btn-info btn-sm mb-3">INICIO</a> 
             <div class="container-fluid">
                 <a class="navbar-brand" href="{{ route('alerts.index') }}">Alertas</a>
             </div>

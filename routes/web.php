@@ -19,12 +19,11 @@ use App\Http\Middleware\AdminMiddleware;
 */
 
 Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::get('/home', function() {
     return view('home');
-})->middleware('auth');
+});
+Route::get('/home', function () {
+    return view('home');
+})->name('home');
 
 // Rutas públicas
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -34,9 +33,68 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 Route::get('/reset-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
 Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('reset.post');
 
+Route::get('/recicladoras', function () {
+    return view('recicladoras'); 
+})->name('recicladoras');
+
+Route::get('/empresas', function () {
+    return view('empresas');
+})->name('empresas');
+
+Route::get('/centrosacopio', function () {
+    return view('centrosacopio'); 
+})->name('centrosacopio');
+
+Route::get('/contactos', function () {
+    return view('contactos'); 
+})->name('contactos');
+
+Route::get('/recicladoraIzcalli', function () {
+    return view('recicladoraIzcalli');
+})->name('recicladoraIzcalli');
+
+Route::get('/reciclacentro', function () {
+    return view('reciclacentro'); 
+})->name('reciclacentro');
+
+Route::get('/recicladoralvarez', function () {
+    return view('recicladoralvarez'); 
+})->name('recicladoralvarez');
+
+Route::get('/recicladoracuspide', function () {
+    return view('recicladoracuspide'); 
+})->name('recicladoracuspide');
+
+Route::get('/recicladorapoambi', function () {
+    return view('recicladorapoambi'); 
+})->name('recicladorapoambi');
+
+Route::get('/recicladoramexico', function () {
+    return view('recicladoramexico'); 
+})->name('recicladoramexico');
+
+Route::get('/recicladoraecatepec', function () {
+    return view('recicladoraecatepec'); 
+})->name('recicladoraecatepec');
+
+Route::get('/recicladoraproton', function () {
+    return view('recicladoraproton'); 
+})->name('recicladoraproton');
+
+Route::get('/recicladoraverdes', function () {
+    return view('recicladoraverdes'); 
+})->name('recicladoraverdes');
+
+
+
+
+
 // Rutas protegidas por autenticación
 Route::middleware([AuthMiddleware::class])->group(function () {
+
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
+    
    
     Route::middleware(['admin'])->group(function () {
     // CRUD de usuarios

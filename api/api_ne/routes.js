@@ -82,7 +82,7 @@ router.get('/users', async (req, res) => {
 // Obtener un usuario por ID
 router.get('/users/:id', async (req, res) => {
   try {
-    const user = await User.findById(req.params.id, 'nombre apellidos edad email rol');
+    const user = await User.findById(req.params.id, 'nombre apellidos edad email rol imagen');
     if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
     res.json(user);
   } catch (err) {
@@ -139,11 +139,11 @@ router.post('/users', async (req, res) => {
 // Actualizar un usuario
 router.put('/users/:id', async (req, res) => {
   try {
-    const { nombre, apellidos, edad, email, rol } = req.body;
+    const { nombre, apellidos, edad, email, rol, imagen} = req.body;
     
     const updatedUser = await User.findByIdAndUpdate(
       req.params.id,
-      { nombre, apellidos, edad, email, rol },
+      { nombre, apellidos, edad, email, rol, imagen},
       { new: true, runValidators: true } 
     );
 
@@ -269,11 +269,12 @@ router.get('/sensors/:id', async (req, res) => {
 // Crear un nuevo sensor
 router.post('/sensors', async (req, res) => {
   try {
-    const { ubicacion, tipo, activo } = req.body;
+    const { ubicacion, tipo, activo, user_id } = req.body; // Añade user_id desde el body
     const nuevoSensor = await Sensor.create({
+      user_id, // Campo obligatorio
       ubicacion,
       tipo,
-      activo: activo !== undefined ? activo : true
+      activo: activo !== undefined ? activo : true,
     });
     res.status(201).json({
       message: 'Sensor creado correctamente',
@@ -288,10 +289,10 @@ router.post('/sensors', async (req, res) => {
 // Actualizar un sensor
 router.put('/sensors/:id', async (req, res) => {
   try {
-    const { ubicacion, tipo, activo } = req.body;
+    const { ubicacion, tipo, activo, user_id } = req.body;
     const sensorActualizado = await Sensor.findByIdAndUpdate(
       req.params.id,
-      { ubicacion, tipo, activo },
+      { ubicacion, tipo, activo, user_id },
       { new: true }
     );
     

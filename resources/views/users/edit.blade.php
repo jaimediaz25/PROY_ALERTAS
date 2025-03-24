@@ -58,8 +58,8 @@
 
         input, select, button {
             width: 100%;
-            padding: 15px;
-            margin-bottom: 15px;
+            padding: 5px;
+            margin-bottom: 5px;
             border-radius: 10px;
             border: 2px solid #ccc;
             font-size: 1rem;
@@ -129,6 +129,19 @@
             background-color: #dc3545;
             color: white;
         }
+        .image-upload-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.profile-preview {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #ddd;
+    margin-bottom: 10px;
+}
 
     </style>
 </head>
@@ -152,9 +165,27 @@
 
             <h2>Editar Usuario</h2>
 
-            <form action="{{ route('users.update', $user['_id']) }}" method="POST">
+            <form action="{{ route('users.update', $user['_id']) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
+                <div class="form-group">
+                   
+                    <div class="image-upload-container">
+                        <img src="{{ $user['imagen'] ?? url('/img/default-user.png') }}" 
+                 id="editUserPreview" 
+                 class="profile-preview">
+                        <input type="file" 
+                               name="imagen" 
+                               id="editUserImageInput" 
+                               class="form-control d-none" 
+                               accept="image/*">
+                        <button type="button" 
+                                
+                                onclick="document.getElementById('editUserImageInput').click()">
+                            Cambiar imagen
+                        </button>
+                    </div>
+                </div>
                 <input type="text" name="nombre" value="{{ $user['nombre'] }}" placeholder="Nombre" required>
                 <input type="text" name="apellidos" value="{{ $user['apellidos'] }}" placeholder="Apellidos" required>
                 <input type="number" name="edad" value="{{ $user['edad'] }}" placeholder="Edad" required>
@@ -162,10 +193,66 @@
                 <select name="rol" required>
                     <option value="usuario" {{ $user['rol'] == 'usuario' ? 'selected' : '' }}>Usuario</option>
                     <option value="admin" {{ $user['rol'] == 'admin' ? 'selected' : '' }}>Administrador</option>
-                    <option value="bombero" {{ $user['rol'] == 'bombero' ? 'selected' : '' }}>Bombero</option>
+                    
                 </select>
                 <button type="submit" class="btn">Actualizar</button>
             </form>
+            <script>
+                document.getElementById('editUserImageInput').addEventListener('change', function(e) {
+                    handleEditUserImage(e.target.files[0]);
+                });
+                
+                function handleEditUserImage(file) {
+                    if (!file) return;
+                
+                    if (file.size > 10485760) {
+                        alert('La imagen excede el límite de 10MB');
+                        return;
+                    }
+                
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const img = new Image();
+                        
+                        img.onload = function() {
+                            const canvas = document.createElement('canvas');
+                            const ctx = canvas.getContext('2d');
+                            
+                            // Configuración de compresión
+                            const MAX_WIDTH = 500;
+                            const scale = Math.min(MAX_WIDTH / img.width, 1);
+                            canvas.width = img.width * scale;
+                            canvas.height = img.height * scale;
+                            
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            
+                            canvas.toBlob(blob => {
+                                // Actualizar vista previa
+                                const preview = document.getElementById('editUserPreview');
+                                preview.src = URL.createObjectURL(blob);
+                                
+                                // Crear archivo comprimido
+                                const compressedFile = new File([blob], file.name, {
+                                    type: 'image/jpeg',
+                                    lastModified: Date.now()
+                                });
+                                
+                                // Actualizar input
+                                const dataTransfer = new DataTransfer();
+                                dataTransfer.items.add(compressedFile);
+                                document.getElementById('editUserImageInput').files = dataTransfer.files;
+                                
+                            }, 'image/jpeg', 0.3);
+                        };
+                        
+                        img.src = e.target.result;
+                    };
+                    
+                    reader.readAsDataURL(file);
+                }
+                </script>
+
 
             <a href="{{ url()->previous() }}" class="back-btn">Volver</a>
         </div>

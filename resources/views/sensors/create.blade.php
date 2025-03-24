@@ -121,6 +121,7 @@
             <h2>Crear Sensor</h2>
             <form action="{{ route('sensors.store') }}" method="POST">
                 @csrf
+                <input type="text" id="user_id" name="user_id" placeholder="ID del usuario" required>
                 <input type="text" id="tipo" name="tipo" placeholder="Tipo" required>
                 <input type="text" id="ubicacion" name="ubicacion" placeholder="Ubicación" required>
                 <select id="activo" name="activo" required>

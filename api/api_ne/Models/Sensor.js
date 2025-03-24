@@ -1,6 +1,11 @@
 const mongoose = require('mongoose');
 
 const SensorSchema = new mongoose.Schema({
+  user_id: { 
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   ubicacion: {
     type: String,
     required: true

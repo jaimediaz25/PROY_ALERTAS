@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Carbon\Carbon; 
 use Illuminate\Support\Facades\Http;
+use Intervention\Image\Facades\Image;
 
 class AuthController extends Controller {
     
@@ -106,5 +107,47 @@ class AuthController extends Controller {
         session()->invalidate();
         session()->regenerateToken();
         return redirect('/login');
+    }
+
+
+    public function updateProfile(Request $request)
+    {
+        $userId = session('user._id');
+        $validated = $request->validate([
+            'nombre' => 'required|string|max:255',
+            'imagen' => [
+                'nullable',
+                'image',
+                'mimes:jpeg,png,jpg,gif',
+                'max:10240'
+            ]
+        ]);
+        $data = ['nombre' => $validated['nombre']];
+        if ($request->hasFile('imagen')) {
+            try {
+                $image = $request->file('imagen');
+                if ($image->getSize() > 10485760) {
+                    return back()->withErrors(['imagen' => 'La imagen excede el límite de 10MB']);
+                }
+                $fileContent = file_get_contents($image->getRealPath());
+                $mimeType = $image->getMimeType();
+                $data['imagen'] = "data:$mimeType;base64,".base64_encode($fileContent);
+            } catch (\Exception $e) {
+                return back()->withErrors(['imagen' => 'Error procesando imagen: '.$e->getMessage()]);
+            }
+        }
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
+        ])
+        ->timeout(120)
+        ->withBody(json_encode($data), 'application/json')
+        ->put("http://localhost:3001/api/users/{$userId}");
+        if ($response->successful()) {
+            $updatedUser = Http::get("http://localhost:3001/api/users/{$userId}")->json();
+            session()->put('user', $updatedUser);
+            return back()->with('success', 'Perfil actualizado');
+        }
+        return back()->withErrors(['error' => 'Error: '.$response->body()]);
     }
 }

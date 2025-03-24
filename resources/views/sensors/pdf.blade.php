@@ -26,7 +26,7 @@
 
         /* Estilos para la tabla */
         table {
-            width: 90%;
+            width: 100%;
             margin: 20px auto;
             border-collapse: collapse;
             background-color: #fff;
@@ -36,7 +36,7 @@
         }
 
         th, td {
-            padding: 12px;
+            padding: 5px;
             text-align: left;
         }
 
@@ -88,6 +88,7 @@
         <thead>
             <tr>
                 <th>ID</th>
+                <th>ID Usuario</th>
                 <th>Ubicación</th>
                 <th>Tipo</th>
                 <th>Estado</th>
@@ -97,6 +98,7 @@
             @foreach($sensors as $sensor)
                 <tr>
                     <td>{{ $sensor['_id'] }}</td>
+                    <td>{{ $sensor['user_id'] }}</td>
                     <td>{{ $sensor['ubicacion'] }}</td>
                     <td>{{ $sensor['tipo'] }}</td>
                     <td>{{ $sensor['activo'] }}</td>

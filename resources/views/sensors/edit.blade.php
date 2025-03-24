@@ -135,6 +135,7 @@
             <form action="{{ route('sensors.update', $sensor['_id']) }}" method="POST">
                 @csrf
                 @method('PUT')
+                <input type="text" name="user_id" value="{{ $sensor['user_id'] }}" placeholder="ID del usuario" required>
                 <input type="text" name="ubicacion" value="{{ $sensor['ubicacion'] }}" placeholder="Ubicación" required>
                 <input type="text" name="tipo" value="{{ $sensor['tipo'] }}" placeholder="Tipo" required>
                 <select name="activo" required>

@@ -99,21 +99,61 @@ class ControllerAPI extends Controller
 
 
     public function update(Request $request, $id)
-    {
-        $validated = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'apellidos' => 'required|string|max:255', 
-            'edad' => 'required|integer|min:18',
-            'email' => 'required|email',
-            'rol' => 'required|in:usuario,admin,bombero' 
-        ]);
-        $response = Http::put("http://localhost:3001/api/users/{$id}", $validated);
-        if ($response->successful()) {
-            return redirect()->route('users.index')->with('success', 'Usuario actualizado');
+{
+    $validated = $request->validate([
+        'nombre' => 'required|string|max:255',
+        'apellidos' => 'required|string|max:255', 
+        'edad' => 'required|integer|min:18',
+        'email' => 'required|email',
+        'rol' => 'required|in:usuario,admin',
+        'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240'
+    ]);
+
+    $data = $validated;
+
+    if ($request->hasFile('imagen')) {
+        try {
+            $image = $request->file('imagen');
+            
+            // Verificar tipo MIME real
+            $mimeType = $image->getMimeType();
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/gif'];
+            
+            if (!in_array($mimeType, $allowedMimes)) {
+                return back()->withInput()->with('error', 'Formato de imagen no válido');
+            }
+
+            // Convertir a base64
+            $base64 = base64_encode(file_get_contents($image));
+            $data['imagen'] = "data:$mimeType;base64,$base64";
+            
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'Error procesando la imagen: '.$e->getMessage());
         }
-        $error = $response->json()['error'] ?? 'Error desconocido';
-        return back()->withInput()->with('error', $error);
+    } else {
+        unset($data['imagen']);
     }
+
+    $response = Http::withHeaders([
+        'Content-Type' => 'application/json',
+        'Accept' => 'application/json'
+    ])
+    ->timeout(90)
+    ->put("http://localhost:3001/api/users/{$id}", $data);
+
+    if ($response->successful()) {
+        if (session('user._id') === $id) {
+            $updatedUser = Http::get("http://localhost:3001/api/users/{$id}")->json();
+            session()->put('user', $updatedUser);
+        }
+        return redirect()->route('users.index')->with('success', 'Usuario actualizado');
+    }
+
+    $error = $response->json()['error'] ?? 'Error desconocido';
+    $statusCode = $response->status();
+
+    return back()->withInput()->with('error', "Error $statusCode: ".substr($error, 0, 200));
+}
 
 
     public function destroy($id)
@@ -397,10 +437,10 @@ class ControllerAPI extends Controller
                     str_contains(strtolower($sensor['activo']), $search);
             });
         }
-        $csvData = "ID,Tipo,Ubicación,Estado\n";
+        $csvData = "ID,ID Usuario,Tipo,Ubicación,Estado\n";
 
         foreach ($sensors as $sensor) {
-            $csvData .= "{$sensor['_id']},{$sensor['tipo']},{$sensor['ubicacion']},{$sensor['activo']}\n";
+            $csvData .= "{$sensor['_id']},{$sensor['user_id']},{$sensor['tipo']},{$sensor['ubicacion']},{$sensor['activo']}\n";
         }
         return response($csvData, 200)
             ->header('Content-Type', 'text/csv')
@@ -451,45 +491,54 @@ class ControllerAPI extends Controller
             $importedCount = 0;
             $errors = [];
             $columnMap = [
-                0 => 'ubicacion',
-                1 => 'tipo', 
-                2 => 'activo'
+                0 => 'user_id',
+                1 => 'ubicacion',
+                2 => 'tipo', 
+                3 => 'activo'
             ];
             foreach ($rows as $index => $row) {
                 try {
-                    if (count($row) < 3) {
-                        $errors[] = "Fila ".($index + 1).": Formato inválido";
+                    if (count($row) < 4) {
+                        $errors[] = "Fila ".($index + 1).": Formato inválido - Debe tener 4 columnas";
                         continue;
                     }
                     $sensorData = [];
                     foreach ($columnMap as $col => $field) {
                         $sensorData[$field] = trim($row[$col]);
                     }
-                    if (empty($sensorData['ubicacion']) || empty($sensorData['tipo'])) {
-                        $errors[] = "Fila ".($index + 1).": Campos obligatorios vacíos";
+                    $camposRequeridos = ['user_id', 'ubicacion', 'tipo'];
+                    foreach ($camposRequeridos as $campo) {
+                        if (empty($sensorData[$campo])) {
+                            $errors[] = "Fila ".($index + 1).": Campo requerido vacío ($campo)";
+                            continue 2; 
+                        }
+                    }
+                    if (!preg_match('/^[a-f\d]{24}$/i', $sensorData['user_id'])) {
+                        $errors[] = "Fila ".($index + 1).": ID de usuario inválido";
                         continue;
                     }
-                    if (!in_array(strtolower($sensorData['activo']), ['0', '1', 'true', 'false'])) {
+                    $valorActivo = strtolower($sensorData['activo']);
+                    if (!in_array($valorActivo, ['0', '1', 'true', 'false'])) {
                         $errors[] = "Fila ".($index + 1).": Valor activo inválido";
                         continue;
                     }
-                    $sensorData['activo'] = (bool) intval($sensorData['activo']);
+                    $sensorData['activo'] = (bool) intval($valorActivo);
                     $checkResponse = Http::get('http://localhost:3001/api/sensors/check', [
                         'ubicacion' => $sensorData['ubicacion'],
                         'tipo' => $sensorData['tipo']
                     ]);
                     if (!$checkResponse->successful()) {
-                        $errors[] = "Fila ".($index + 1).": Error verificando sensor";
+                        $errors[] = "Fila ".($index + 1).": Error de verificación en API";
                         continue;
                     }
                     if ($checkResponse->json()['exists']) {
-                        $errors[] = "Fila ".($index + 1).": Sensor ya registrado";
+                        $errors[] = "Fila ".($index + 1).": Sensor ya existe para este usuario";
                         continue;
                     }
                     $apiResponse = Http::post('http://localhost:3001/api/sensors', $sensorData);
                     if (!$apiResponse->successful()) {
                         $errorData = $apiResponse->json();
-                        $errors[] = "Fila ".($index + 1).": ".($errorData['error'] ?? 'Error API');
+                        $errors[] = "Fila ".($index + 1).": ".($errorData['error'] ?? 'Error desconocido');
                         continue;
                     }
                     $importedCount++;
@@ -497,8 +546,10 @@ class ControllerAPI extends Controller
                     $errors[] = "Fila ".($index + 1).": Error - ".$e->getMessage();
                 }
             }
-            $result = "Importados: $importedCount";
-            if (count($errors) > 0) $result .= " | Errores: ".count($errors);
+            $result = "Importación completa: $importedCount sensores";
+            if (count($errors)) {
+                $result .= " | Errores: ".count($errors)." filas con problemas";
+            }
             return redirect()->back()
                 ->with('import_result', $result)
                 ->with('import_errors', $errors);
