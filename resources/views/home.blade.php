@@ -529,6 +529,14 @@
                                 <a href="{{ route('alerts.index') }}">Alertas</a>
                             </div>
                         @endif
+                        @if(session('user.rol') === 'usuario')
+                            <div class="mobile-admin-links">
+                                <a href="{{ route('sensors.create') }}">Agregar un sensor</a>
+                                <a href="{{ route('grafica.temperatura') }}">Gráfica de Temperaturas</a>
+                                <a href="{{ route('grafica.gas') }}">Gráfica de Gases</a>
+                                <a href="{{ route('latest.values') }}">Monitor en Tiempo Real</a>
+                            </div>
+                        @endif
                     </div>
                 @else
                     <a class="btn" href="{{ route('login') }}">Iniciar Sesión</a>

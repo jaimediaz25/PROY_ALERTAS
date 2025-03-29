@@ -10,10 +10,6 @@ const ReadingSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  registrado_en: {
-    type: Date,
-    required: true
-  }
 }, {
   timestamps: {
     createdAt: 'created_at',

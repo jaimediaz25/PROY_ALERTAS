@@ -135,9 +135,13 @@
             <form action="{{ route('sensors.update', $sensor['_id']) }}" method="POST">
                 @csrf
                 @method('PUT')
-                <input type="text" name="user_id" value="{{ $sensor['user_id'] }}" placeholder="ID del usuario" required>
+                <input type="hidden" name="redirect_to" value="{{ session('user.rol') === 'usuario' ? 'latest.values' : 'sensors.index' }}">
+                <input type="text" name="user_id" value="{{ $sensor['user_id'] }}" placeholder="ID del usuario" readonly required>
                 <input type="text" name="ubicacion" value="{{ $sensor['ubicacion'] }}" placeholder="Ubicación" required>
-                <input type="text" name="tipo" value="{{ $sensor['tipo'] }}" placeholder="Tipo" required>
+                <div>
+                    <input type="text" value="{{ $sensor['tipo'] }}" readonly>
+                    <input type="hidden" name="tipo" value="{{ $sensor['tipo'] }}">
+                </div>
                 <select name="activo" required>
                     <option value="1" {{ $sensor['activo'] ? 'selected' : '' }}>Sí</option>
                     <option value="0" {{ !$sensor['activo'] ? 'selected' : '' }}>No</option>

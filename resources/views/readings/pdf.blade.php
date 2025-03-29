@@ -97,7 +97,7 @@
                 <tr>
                     <td>{{ $reading['sensor_id'] }}</td>
                     <td>{{ $reading['valor'] }}</td>
-                    <td>{{ $reading['registrado_en'] }}</td>
+                    <td>{{ $reading['created_at'] }}</td>
                 </tr>
             @endforeach
         </tbody>

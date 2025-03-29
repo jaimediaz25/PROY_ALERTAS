@@ -43,12 +43,9 @@
         }
         .navbar .logo img {
             height: 50px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            
         }
-        .navbar .logo img:hover {
-            transform: scale(1.1);
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-        }
+        
         .navbar .menu {
             display: flex;
             align-items: center;

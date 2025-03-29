@@ -94,7 +94,16 @@ Route::middleware([AuthMiddleware::class])->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
-    
+    Route::get('/gratemp', [AuthController::class, 'temperatura'])->name('grafica.temperatura');
+    Route::get('/gragas', [AuthController::class, 'gas'])->name('grafica.gas');
+    Route::get('/latest-values', [AuthController::class, 'latestValues'])->name('latest.values');
+    Route::get('/latest-values/api', [AuthController::class, 'latestValuesApi'])->name('api.latestReadings');
+    Route::put('/gratemp/{id}/status', [AuthController::class, 'updateStatus'])->name('sensors.updateStatus'); 
+    Route::get('/sensors/create', [ControllerAPI::class, 'createsen'])->name('sensors.create');
+    Route::post('/sensors', [ControllerAPI::class, 'storesen'])->name('sensors.store');
+    Route::get('/sensors/{id}/edit', [ControllerAPI::class, 'editsen'])->name('sensors.edit');
+    Route::put('/sensors/{id}', [ControllerAPI::class, 'updatesen'])->name('sensors.update');
+    Route::delete('/sensors/{id}', [ControllerAPI::class, 'destroysen'])->name('sensors.destroy');
    
     Route::middleware(['admin'])->group(function () {
     // CRUD de usuarios
@@ -111,11 +120,6 @@ Route::middleware([AuthMiddleware::class])->group(function () {
 
     // CRUD de sensors
     Route::get('/sensors', [ControllerAPI::class, 'indexsen'])->name('sensors.index');
-    Route::get('/sensors/create', [ControllerAPI::class, 'createsen'])->name('sensors.create');
-    Route::post('/sensors', [ControllerAPI::class, 'storesen'])->name('sensors.store');
-    Route::get('/sensors/{id}/edit', [ControllerAPI::class, 'editsen'])->name('sensors.edit');
-    Route::put('/sensors/{id}', [ControllerAPI::class, 'updatesen'])->name('sensors.update');
-    Route::delete('/sensors/{id}', [ControllerAPI::class, 'destroysen'])->name('sensors.destroy');
     Route::get('/sensors/pdf', [ControllerAPI::class, 'exportPdfsen'])->name('sensors.exportPdf');
     Route::get('/sensors/excel', [ControllerAPI::class, 'exportExcelsen'])->name('sensors.exportExcel');
     Route::get('/sensors/grafica', [ControllerAPI::class, 'showGraphsen'])->name('sensors.grafica');

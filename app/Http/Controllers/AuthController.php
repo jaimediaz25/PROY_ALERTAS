@@ -150,4 +150,94 @@ class AuthController extends Controller {
         }
         return back()->withErrors(['error' => 'Error: '.$response->body()]);
     }
+
+
+    public function temperatura()
+    {
+        $user_id = session('user._id');
+        $response = Http::get('http://localhost:3001/api/sensorsxuser', [
+            'user_id' => $user_id,
+            'tipo' => 'Temperatura'
+        ]);
+        $sensors = $response->successful() ? $response->json() : [];
+        foreach ($sensors as &$sensor) {
+            $readingsResponse = Http::get('http://localhost:3001/api/readingsxuser', [
+                'sensor_id' => $sensor['_id'],
+                'limit' => 50
+            ]);
+            if ($readingsResponse->successful()) {
+                $readings = $readingsResponse->json();
+                // Invertir el orden para mostrar del más antiguo al más reciente
+                $sensor['readings'] = array_reverse($readings);
+            } else {
+                $sensor['readings'] = [];
+            }
+        }
+        return view('graficas.gratemp', compact('sensors'));
+    }
+
+
+    public function gas()
+    {
+        $user_id = session('user._id');
+        $response = Http::get('http://localhost:3001/api/sensorsxuser', [
+            'user_id' => $user_id,
+            'tipo' => 'Humo'
+        ]);
+        
+        $sensors = $response->successful() ? $response->json() : [];
+        
+        foreach ($sensors as &$sensor) {
+            $readingsResponse = Http::get('http://localhost:3001/api/readingsxuser', [
+                'sensor_id' => $sensor['_id'],
+                'limit' => 50
+            ]);
+            
+            if ($readingsResponse->successful()) {
+                $readings = $readingsResponse->json();
+                // Invertir el orden para mostrar del más antiguo al más reciente
+                $sensor['readings'] = array_reverse($readings);
+            } else {
+                $sensor['readings'] = [];
+            }
+        }
+        
+        return view('graficas.gragas', compact('sensors'));
+    }
+
+
+    public function latestValues()
+    {
+        $user_id = session('user._id');
+        $response = Http::get('http://localhost:3001/api/latestReadings', [
+            'user_id' => $user_id
+        ]);
+        $latestReadings = $response->successful() ? $response->json() : [];
+        return view('graficas.latestValues', compact('latestReadings'));
+    }
+
+
+    public function latestValuesApi()
+    {
+        $user_id = session('user._id');
+        $response = Http::get('http://localhost:3001/api/latestReadings', [
+            'user_id' => $user_id
+        ]);
+        $latestReadings = $response->successful() ? $response->json() : [];
+        return response()->json($latestReadings);
+    }
+
+
+    public function updateStatus(Request $request, $id)
+    {
+        $response = Http::put("http://localhost:3001/api/sensors/{$id}", [
+            'activo' => $request->input('activo')
+        ]);
+
+        if ($response->successful()) {
+            return redirect()->back()->with('success', 'Estado del sensor actualizado correctamente');
+        }
+
+        return redirect()->back()->with('error', 'Error al actualizar el estado del sensor');
+    }
 }

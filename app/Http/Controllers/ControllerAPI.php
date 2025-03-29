@@ -387,7 +387,7 @@ class ControllerAPI extends Controller
     {
         $response = Http::put("http://localhost:3001/api/sensors/{$id}", $request->all());
         if ($response->successful()) {
-            return redirect()->route('sensors.index')->with('success', 'Sensor actualizado correctamente');
+            return redirect()->route($request->input('redirect_to'))->with('success', 'Sensor actualizado correctamente');
         }
         return redirect()->back()->with('error', 'Error al actualizar sensor');
     }
@@ -398,6 +398,7 @@ class ControllerAPI extends Controller
         $response = Http::delete("http://localhost:3001/api/sensors/{$id}");
         if ($response->successful()) {
             return redirect()->route('sensors.index')->with('success', 'Sensor eliminado correctamente');
+            
         }
         return redirect()->back()->with('error', 'Error al eliminar sensor');
     }
@@ -580,7 +581,7 @@ class ControllerAPI extends Controller
                     str_contains(strtolower($reading['valor']), $search);
             })->values();
         }
-        $perPage = 3; 
+        $perPage = 10; 
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $currentItems = $readings->slice(($currentPage - 1) * $perPage, $perPage)->all();
         $readings = new LengthAwarePaginator($currentItems, $readings->count(), $perPage, $currentPage, [
@@ -650,7 +651,7 @@ class ControllerAPI extends Controller
             $readings = $readings->filter(function ($reading) use ($search) {
                 return str_contains(strtolower($reading['sensor_id']), $search) ||
                     str_contains(strtolower($reading['valor']), $search) ||
-                    str_contains(strtolower($reading['registrado_en']), $search);
+                    str_contains(strtolower($reading['created_at']), $search);
             })->values();
         }
         $pdf = Pdf::loadView('readings.pdf', compact('readings'));
@@ -670,12 +671,12 @@ class ControllerAPI extends Controller
             $readings = $readings->filter(function ($reading) use ($search) {
                 return str_contains(strtolower($reading['sensor_id']), $search) ||
                     str_contains(strtolower($reading['valor']), $search) ||
-                    str_contains(strtolower($reading['registrado_en']), $search);
+                    str_contains(strtolower($reading['created_at']), $search);
             });
         }
         $csvData = "Sensor ID,Valor,Fecha\n";
         foreach ($readings as $reading) {
-            $csvData .= "{$reading['sensor_id']},{$reading['valor']},{$reading['registrado_en']}\n";
+            $csvData .= "{$reading['sensor_id']},{$reading['valor']},{$reading['created_at']}\n";
         }
         return response($csvData, 200)
             ->header('Content-Type', 'text/csv')
@@ -730,14 +731,13 @@ class ControllerAPI extends Controller
             $errors = [];
             foreach ($rows as $index => $row) {
                 try {
-                    if (count($row) < 3) {
-                        $errors[] = "Fila ".($index + 1).": Formato inválido, se requieren 3 columnas";
+                    if (count($row) < 2) {
+                        $errors[] = "Fila ".($index + 1).": Formato inválido, se requieren 2 columnas";
                         continue;
                     }
                     $sensor_id = trim($row[0]);
                     $valor = trim($row[1]);
-                    $registrado_en = trim($row[2]);
-                    if (empty($sensor_id) || empty($valor) || empty($registrado_en)) {
+                    if (empty($sensor_id) || empty($valor)) {
                         $errors[] = "Fila ".($index + 1).": Todos los campos son obligatorios";
                         continue;
                     }
@@ -745,10 +745,7 @@ class ControllerAPI extends Controller
                         $errors[] = "Fila ".($index + 1).": Valor debe ser numérico";
                         continue;
                     }
-                    if (!strtotime($registrado_en)) {
-                        $errors[] = "Fila ".($index + 1).": Formato de fecha inválido";
-                        continue;
-                    }
+                    
                     $checkSensor = Http::get("http://localhost:3001/api/sensors/{$sensor_id}");
                     if (!$checkSensor->successful()) {
                         $errors[] = "Fila ".($index + 1).": Error verificando sensor";
@@ -760,8 +757,7 @@ class ControllerAPI extends Controller
                     }
                     $response = Http::post('http://localhost:3001/api/readings', [
                         'sensor_id' => $sensor_id,
-                        'valor' => $valor,
-                        'registrado_en' => $registrado_en
+                        'valor' => $valor
                     ]);
                     if (!$response->successful()) {
                         $errorData = $response->json();

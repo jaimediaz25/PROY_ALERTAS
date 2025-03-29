@@ -113,27 +113,35 @@
     </style>
 </head>
 <body>
-
-<div class="container">
-    <div class="form-container">
-        <div class="image"></div>
-        <div class="form-content">
-            <h2>Crear Sensor</h2>
-            <form action="{{ route('sensors.store') }}" method="POST">
-                @csrf
-                <input type="text" id="user_id" name="user_id" placeholder="ID del usuario" required>
-                <input type="text" id="tipo" name="tipo" placeholder="Tipo" required>
-                <input type="text" id="ubicacion" name="ubicacion" placeholder="Ubicación" required>
-                <select id="activo" name="activo" required>
-                    <option value="1" @if(old('activo') == '1') selected @endif>Sí</option>
-                    <option value="0" @if(old('activo') == '0') selected @endif>No</option>
-                </select>
-                <button type="submit" class="btn">Guardar</button>
-            </form>
-            <a href="{{ route('sensors.index') }}" class="back-btn">Cancelar</a>
+    <div class="container">
+        <div class="form-container">
+            <div class="image"></div>
+            <div class="form-content">
+                <h2>Crear Sensor</h2>
+                <form action="{{ route('sensors.store') }}" method="POST">
+                    @csrf
+                    @if(session('user.rol') === 'usuario')
+                        <input type="text" id="user_id" name="user_id" value="{{ session('user._id')}}" class="disabled-input" readonly required>
+                    @else
+                        <input type="text" id="user_id" name="user_id" placeholder="ID del usuario" required>
+                    @endif
+                    
+                    <select id="tipo" name="tipo" required>
+                        <option value="" disabled selected>Seleccione un tipo</option>
+                        <option value="Humo">Humo</option>
+                        <option value="Temperatura">Temperatura</option>
+                    </select>
+                    
+                    <input type="text" id="ubicacion" name="ubicacion" placeholder="Ubicación" required>
+                    <select id="activo" name="activo" required>
+                        <option value="1" @if(old('activo') == '1') selected @endif>Sí</option>
+                        <option value="0" @if(old('activo') == '0') selected @endif>No</option>
+                    </select>
+                    <button type="submit" class="btn">Guardar</button>
+                </form>
+                <a href="{{ route('sensors.index') }}" class="back-btn">Cancelar</a>
+            </div>
         </div>
     </div>
-</div>
-
-</body>
+    </body>
 </html>

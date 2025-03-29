@@ -123,7 +123,7 @@
                 @method('PUT')
                 <input type="text" name="sensor_id" id="sensor_id" value="{{ old('sensor_id', $reading['sensor_id']) }}" required placeholder="Sensor ID">
                 <input type="number" name="valor" id="valor" value="{{ old('valor', $reading['valor']) }}" required placeholder="Valor">
-                <input type="datetime-local" name="registrado_en" id="registrado_en" value="{{ old('registrado_en', $reading['registrado_en']) }}" required placeholder="Fecha de Registro">
+                
                 <button type="submit" class="btn">Actualizar</button>
             </form>
             <a href="{{ url()->previous() }}" class="back-btn">Volver</a>

@@ -158,7 +158,8 @@
 
                 <div class="mt-4 text-center">
                     <a href="{{ route('register') }}" class="btn btn-link text-danger px-3 py-2 mb-2">¿No tienes cuenta? Regístrate</a><br>
-                    <a href="{{ route('password.request') }}" class="btn btn-link text-danger px-3 py-2 mb-2">¿Olvidaste tu contraseña?</a>
+                    <a href="{{ route('password.request') }}" class="btn btn-link text-danger px-3 py-2 mb-2">¿Olvidaste tu contraseña?</a><br>
+                    <a href="{{ route('home') }}" class="btn btn-link text-danger px-3 py-2 mb-2">Ir a la página principal</a>
                 </div>
             </div>
         </div>

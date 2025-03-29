@@ -126,9 +126,6 @@
                     <label for="valor">Valor:</label>
                     <input type="number" name="valor" id="valor" value="{{ old('valor') }}" required>
                     
-                    <label for="registrado_en">Fecha de Registro:</label>
-                    <input type="datetime-local" name="registrado_en" id="registrado_en" value="{{ old('registrado_en') }}" required>
-                    
                     <button type="submit" class="btn">Guardar</button>
                 </form>
                 <a href="{{ url()->previous() }}" class="back-btn">Volver</a>

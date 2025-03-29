@@ -198,8 +198,8 @@
         <div class="contact-details">
             <p>📞 Teléfonos: +720 248 5834</p>
             <p>📞 Teléfonos: +55 2544 2435</p>
-            <p>📧 Correo Electrónico: <a href="mailto:contacto@ecovibe.com">contacto@PsycoWax.com</a></p>
-            <p>🌐 Sitio Web: <a href="http://127.0.0.1:8000/ecovibe ">www.Psycowax.com</a></p>
+            <p>📧 Correo Electrónico: <a href="mailto:contacto@psycowax.com">contacto@psycowax.com</a></p>
+            <p>🌐 Sitio Web: <a href="http://127.0.0.1:8000/home">www.psycowax.com</a></p>
         </div>
     </section>
 

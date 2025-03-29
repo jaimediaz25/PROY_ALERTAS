@@ -7,6 +7,50 @@ const Reading = require('./Models/Reading');
 const Alert = require('./Models/Alert');
 const { body, validationResult } = require('express-validator');
 
+// Obtener sensores con filtros
+router.get('/sensorsxuser', async (req, res) => {
+  try {
+    const { user_id, tipo } = req.query;
+    if (!user_id) {
+      return res.status(400).json({ error: 'Se requiere el user_id' });
+    }
+    const query = { 
+      user_id: user_id,
+      ...(tipo && { tipo: { $regex: new RegExp(tipo, 'i') } })
+    };
+    const sensors = await Sensor.find(query)
+      .select('_id ubicacion tipo activo created_at') 
+      .sort({ created_at: -1 }); 
+    if (sensors.length === 0) {
+      return res.status(404).json({ message: 'No se encontraron sensores' });
+    }
+    res.json(sensors);
+  } catch (err) {
+    console.error('Error en /sensorsxuser:', err);
+    res.status(500).json({ 
+      error: 'Error al obtener sensores',
+      detalle: err.message 
+    });
+  }
+});
+
+// Obtener lecturas de un sensor
+router.get('/readingsxuser', async (req, res) => {
+  try {
+      const { sensor_id, limit = 50 } = req.query;
+      const readings = await Reading.find({ sensor_id })
+          .sort({ created_at: -1 })
+          .limit(parseInt(limit))
+          .select('valor created_at') // Asegurar campos requeridos
+          .lean();
+          
+      res.json(readings);
+  } catch (err) {
+      res.status(500).json({ error: 'Error obteniendo lecturas' });
+  }
+});
+
+
 // Actualizar contraseña
 router.put('/users/update-password', async (req, res) => {
   try {
@@ -389,12 +433,25 @@ router.get('/readings/:id', async (req, res) => {
 // Crear un nuevo reading
 router.post('/readings', async (req, res) => {
   try {
-    const { sensor_id, valor, registrado_en } = req.body;
+    const { sensor_id, valor } = req.body;
     
+    if (!sensor_id || valor === undefined) {
+      return res.status(400).json({ error: 'Datos incompletos' });
+    }
+    // Buscar el sensor y verificar si está activo
+    const sensor = await Sensor.findById(sensor_id);
+    if (!sensor) {
+      return res.status(404).json({ error: 'Sensor no encontrado' });
+    }
+
+    if (!sensor.activo) {
+      return res.status(200).json({ 
+        message: 'Sensor inactivo: lectura ignorada' 
+      });
+    }
     const nuevoReading = await Reading.create({
       sensor_id,
-      valor,
-      registrado_en: registrado_en || new Date()
+      valor
     });
     
     res.status(201).json({
@@ -407,14 +464,15 @@ router.post('/readings', async (req, res) => {
   }
 });
 
+
 // Actualizar un reading
 router.put('/readings/:id', async (req, res) => {
   try {
-    const { sensor_id, valor, registrado_en } = req.body;
+    const { sensor_id, valor} = req.body;
     
     const readingActualizado = await Reading.findByIdAndUpdate(
       req.params.id,
-      { sensor_id, valor, registrado_en },
+      { sensor_id, valor},
       { new: true }
     );
     
@@ -438,6 +496,7 @@ router.delete('/readings/:id', async (req, res) => {
   }
 });
 
+
 //Mostrar la grafica
 router.get('/readings/stats/monthly', async (req, res) => {
   try {
@@ -445,8 +504,8 @@ router.get('/readings/stats/monthly', async (req, res) => {
       {
         $group: {
           _id: {
-            year: { $year: "$registrado_en" },
-            month: { $month: "$registrado_en" }
+            year: { $year: "$created_at" },
+            month: { $month: "$created_at" }
           },
           total: { $sum: 1 },
           promedio: { $avg: "$valor" },
@@ -475,6 +534,41 @@ router.get('/readings/stats/monthly', async (req, res) => {
     res.status(500).json({ error: 'Error al obtener datos para la gráfica' });
   }
 });
+
+
+// Obtener el último valor registrado para cada sensor del usuario
+router.get('/latestReadings', async (req, res) => {
+  try {
+    const { user_id } = req.query;
+    if (!user_id) {
+      return res.status(400).json({ error: 'Se requiere el user_id' });
+    }
+    const sensors = await Sensor.find({ user_id });
+    if (!sensors.length) {
+      return res.status(404).json({ error: 'No se encontraron sensores para este usuario' });
+    }
+    const latestReadings = [];
+    for (const sensor of sensors) {
+      const reading = await Reading.findOne({ sensor_id: sensor._id })
+      .sort({ created_at: -1 })
+      .lean();
+      if (reading) {
+        latestReadings.push({
+          sensor_id: sensor._id,
+          tipo: sensor.tipo,
+          ubicacion: sensor.ubicacion,
+          reading: reading
+        });
+      }
+    }
+
+    res.json(latestReadings);
+  } catch (err) {
+    console.error('Error al obtener las últimas lecturas:', err);
+    res.status(500).json({ error: 'Error al obtener lecturas' });
+  }
+});
+
 
 
 

@@ -260,7 +260,7 @@
                     <th>ID</th>
                     <th>Sensor ID</th>
                     <th>Valor</th>
-                    <th>Registrado En</th>
+                    
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -270,7 +270,7 @@
                         <td>{{ $reading['_id'] }}</td>
                         <td>{{ $reading['sensor_id'] }}</td>
                         <td>{{ $reading['valor'] }}</td>
-                        <td>{{ $reading['registrado_en'] }}</td>
+                        
                         <td>
                             <a href="{{ route('readings.edit', $reading['_id']) }}" class="btn btn-warning btn-sm">Editar</a>
                             <form action="{{ route('readings.destroy', $reading['_id']) }}" method="POST" style="display:inline;">
