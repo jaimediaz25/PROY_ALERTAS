@@ -7,6 +7,9 @@ const Reading = require('./Models/Reading');
 const Alert = require('./Models/Alert');
 const { body, validationResult } = require('express-validator');
 
+
+
+
 // Obtener sensores con filtros
 router.get('/sensorsxuser', async (req, res) => {
   try {
@@ -430,7 +433,23 @@ router.get('/readings/:id', async (req, res) => {
   }
 });
 
-// Crear un nuevo reading
+
+// Configuración de umbrales para cada tipo de sensor
+const UMBRALES = {
+  Humo: {
+    ALTA: 900,
+    MEDIA: 600,
+    BAJA: 100
+  },
+  Temperatura: {
+    ALTA: 60,
+    MEDIA: 40,
+    BAJA: 10
+  },
+  // Agregar más tipos según necesidades
+};
+
+// Crear un nuevo reading con generación de alertas
 router.post('/readings', async (req, res) => {
   try {
     const { sensor_id, valor } = req.body;
@@ -438,22 +457,42 @@ router.post('/readings', async (req, res) => {
     if (!sensor_id || valor === undefined) {
       return res.status(400).json({ error: 'Datos incompletos' });
     }
-    // Buscar el sensor y verificar si está activo
+
     const sensor = await Sensor.findById(sensor_id);
-    if (!sensor) {
-      return res.status(404).json({ error: 'Sensor no encontrado' });
+    if (!sensor) return res.status(404).json({ error: 'Sensor no encontrado' });
+    if (!sensor.activo) return res.status(200).json({ message: 'Sensor inactivo' });
+
+    const nuevoReading = await Reading.create({ sensor_id, valor });
+
+    // Generar alerta si corresponde
+    const umbrales = UMBRALES[sensor.tipo];
+    if (umbrales) {
+      let tipo_alerta = null;
+      let mensaje = '';
+
+      if (valor >= umbrales.ALTA) {
+        tipo_alerta = 'ALTA';
+        mensaje = `${sensor.tipo} crítico: ${valor} (Supera ${umbrales.ALTA})`;
+      } else if (valor >= umbrales.MEDIA) {
+        tipo_alerta = 'MEDIA';
+        mensaje = `${sensor.tipo} elevado: ${valor} (Supera ${umbrales.MEDIA})`;
+      } else if (valor >= umbrales.BAJA) {
+        tipo_alerta = 'BAJA';
+        mensaje = `${sensor.tipo} anormal: ${valor} (Supera ${umbrales.BAJA})`;
+      }
+
+      if (tipo_alerta) {
+        await Alert.create({
+          sensor_id,
+          user_id: sensor.user_id, // Asume que el sensor tiene relación con usuario
+          tipo_alerta,
+          mensaje,
+          atendida: false,
+          generado_en: new Date()
+        });
+      }
     }
 
-    if (!sensor.activo) {
-      return res.status(200).json({ 
-        message: 'Sensor inactivo: lectura ignorada' 
-      });
-    }
-    const nuevoReading = await Reading.create({
-      sensor_id,
-      valor
-    });
-    
     res.status(201).json({
       message: 'Reading creado correctamente',
       id: nuevoReading._id
@@ -463,6 +502,11 @@ router.post('/readings', async (req, res) => {
     res.status(500).json({ error: 'Error al crear reading' });
   }
 });
+
+
+
+
+
 
 
 // Actualizar un reading
@@ -586,6 +630,50 @@ router.get('/alerts', async (req, res) => {
   }
 });
 
+// Obtener alertas no atendidas del usuario actual
+router.get('/alerts/unacknowledged', async (req, res) => {
+  try {
+      const { user_id } = req.query;
+      
+      // Validación adicional
+      if (!user_id) {
+          return res.status(400).json({ error: 'user_id es requerido' });
+      }
+
+      const alerts = await Alert.find({
+          user_id: new mongoose.Types.ObjectId(user_id), // Conversión necesaria
+          tipo_alerta: 'ALTA',
+          atendida: false
+      }).lean(); // Asegura que retorna objetos JSON simples
+
+      res.json(alerts);
+  } catch (err) {
+      console.error('Error obteniendo alertas:', err);
+      res.status(500).json({ error: 'Error obteniendo alertas' });
+  }
+});
+
+// Actualizar estado de alerta
+router.put('/alerts/:id/attend', async (req, res) => {
+  try {
+    const alert = await Alert.findByIdAndUpdate(
+      req.params.id,
+      { atendida: req.body.atendida },
+      { new: true }
+    );
+    
+    if (!alert) {
+      return res.status(404).json({ error: 'Alerta no encontrada' });
+    }
+    
+    res.json({ message: 'Alerta actualizada', alert });
+  } catch (err) {
+    console.error('Error actualizando alerta:', err);
+    res.status(500).json({ error: 'Error actualizando alerta' });
+  }
+});
+
+
 // Obtener una alerta por ID
 router.get('/alerts/:id', async (req, res) => {
   try {
@@ -611,6 +699,7 @@ router.post('/alerts', async (req, res) => {
       atendida: atendida || false,
       generado_en: generado_en || new Date()
     });
+
     
     res.status(201).json({
       message: 'Alerta creada correctamente',
@@ -621,6 +710,7 @@ router.post('/alerts', async (req, res) => {
     res.status(500).json({ error: 'Error al crear alerta' });
   }
 });
+
 
 // Actualizar una alerta
 router.put('/alerts/:id', async (req, res) => {
@@ -775,6 +865,7 @@ router.post('/auth/login', async (req, res) => {
     res.status(500).json({ error: 'Error al iniciar sesión' });
   }
 });
+
 
 
 

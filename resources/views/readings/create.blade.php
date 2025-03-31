@@ -128,7 +128,7 @@
                     
                     <button type="submit" class="btn">Guardar</button>
                 </form>
-                <a href="{{ url()->previous() }}" class="back-btn">Volver</a>
+                <a href="{{ route('readings.index') }}" class="back-btn">Cancelar</a>
             </div>
         </div>
     </div>

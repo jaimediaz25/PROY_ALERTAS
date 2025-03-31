@@ -240,4 +240,38 @@ class AuthController extends Controller {
 
         return redirect()->back()->with('error', 'Error al actualizar el estado del sensor');
     }
+
+
+    public function getUnacknowledged(Request $request)
+    {
+        $user_id = session('user._id');
+        $response = Http::get('http://localhost:3001/api/alerts/unacknowledged', [
+            'user_id' => $user_id // Asume autenticación de usuario
+        ]);
+
+        if ($response->successful()) {
+            return $response->json();
+        }
+
+        return response()->json([
+            'error' => 'Error al obtener alertas'
+        ], 500);
+    }
+
+    public function attendAlert(Request $request, $id)
+    {
+        $user_id = session('user._id');
+        $response = Http::put("http://localhost:3001/api/alerts/{$id}/attend", [
+            'atendida' => $request->atendida,
+            'user_id' => $user_id // Verificación adicional de seguridad
+        ]);
+
+        if ($response->successful()) {
+            return $response->json();
+        }
+
+        return response()->json([
+            'error' => 'Error al actualizar la alerta'
+        ], 500);
+    }
 }

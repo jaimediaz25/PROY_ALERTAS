@@ -104,6 +104,9 @@ Route::middleware([AuthMiddleware::class])->group(function () {
     Route::get('/sensors/{id}/edit', [ControllerAPI::class, 'editsen'])->name('sensors.edit');
     Route::put('/sensors/{id}', [ControllerAPI::class, 'updatesen'])->name('sensors.update');
     Route::delete('/sensors/{id}', [ControllerAPI::class, 'destroysen'])->name('sensors.destroy');
+    Route::get('/alerts/unacknowledged', [AuthController::class, 'getUnacknowledged'])->name('api.alerts.unacknowledged');
+    Route::put('/alerts/{id}/attend', [AuthController::class, 'attendAlert'])->name('api.alerts.attend');
+    
    
     Route::middleware(['admin'])->group(function () {
     // CRUD de usuarios
