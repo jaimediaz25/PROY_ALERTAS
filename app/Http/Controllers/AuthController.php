@@ -23,7 +23,7 @@ class AuthController extends Controller {
             'password' => 'required'
         ]);
     
-        $response = Http::post('http://localhost:3001/api/auth/login', [
+        $response = Http::post('http://localhost:3000/PsycoWax/v1/authxx/login', [
             'email' => $credentials['email'],
             'password' => $credentials['password']
         ]);
@@ -59,7 +59,7 @@ class AuthController extends Controller {
             'password' => 'required|min:8'
         ]);
 
-        $response = Http::post('http://localhost:3001/api/users', [
+        $response = Http::post('http://localhost:3000/PsycoWax/v1/usersxx', [
             'nombre' => $request->nombre,
             'apellidos' => $request->apellidos,
             'edad' => $request->edad,
@@ -88,7 +88,7 @@ class AuthController extends Controller {
             'password' => 'required|min:8'
         ]);
     
-        $response = Http::put('http://localhost:3001/api/users/update-password', [
+        $response = Http::put('http://localhost:3000/PsycoWax/v1/usersxx/update-password', [
             'email' => $request->email,
             'password' => $request->password
         ]);
@@ -142,9 +142,9 @@ class AuthController extends Controller {
         ])
         ->timeout(120)
         ->withBody(json_encode($data), 'application/json')
-        ->put("http://localhost:3001/api/users/{$userId}");
+        ->put("http://localhost:3000/PsycoWax/v1/usersxx/{$userId}");
         if ($response->successful()) {
-            $updatedUser = Http::get("http://localhost:3001/api/users/{$userId}")->json();
+            $updatedUser = Http::get("http://localhost:3000/PsycoWax/v1/usersxx/{$userId}")->json();
             session()->put('user', $updatedUser);
             return back()->with('success', 'Perfil actualizado');
         }
@@ -155,13 +155,13 @@ class AuthController extends Controller {
     public function temperatura()
     {
         $user_id = session('user._id');
-        $response = Http::get('http://localhost:3001/api/sensorsxuser', [
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/sensorsxuserxx', [
             'user_id' => $user_id,
             'tipo' => 'Temperatura'
         ]);
         $sensors = $response->successful() ? $response->json() : [];
         foreach ($sensors as &$sensor) {
-            $readingsResponse = Http::get('http://localhost:3001/api/readingsxuser', [
+            $readingsResponse = Http::get('http://localhost:3000/PsycoWax/v1/readingsxuserxx', [
                 'sensor_id' => $sensor['_id'],
                 'limit' => 50
             ]);
@@ -180,7 +180,7 @@ class AuthController extends Controller {
     public function gas()
     {
         $user_id = session('user._id');
-        $response = Http::get('http://localhost:3001/api/sensorsxuser', [
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/sensorsxuserxx', [
             'user_id' => $user_id,
             'tipo' => 'Humo'
         ]);
@@ -188,7 +188,7 @@ class AuthController extends Controller {
         $sensors = $response->successful() ? $response->json() : [];
         
         foreach ($sensors as &$sensor) {
-            $readingsResponse = Http::get('http://localhost:3001/api/readingsxuser', [
+            $readingsResponse = Http::get('http://localhost:3000/PsycoWax/v1/readingsxuserxx', [
                 'sensor_id' => $sensor['_id'],
                 'limit' => 50
             ]);
@@ -209,7 +209,7 @@ class AuthController extends Controller {
     public function latestValues()
     {
         $user_id = session('user._id');
-        $response = Http::get('http://localhost:3001/api/latestReadings', [
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/latestReadingsxx', [
             'user_id' => $user_id
         ]);
         $latestReadings = $response->successful() ? $response->json() : [];
@@ -220,7 +220,7 @@ class AuthController extends Controller {
     public function latestValuesApi()
     {
         $user_id = session('user._id');
-        $response = Http::get('http://localhost:3001/api/latestReadings', [
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/latestReadingsxx', [
             'user_id' => $user_id
         ]);
         $latestReadings = $response->successful() ? $response->json() : [];
@@ -230,7 +230,7 @@ class AuthController extends Controller {
 
     public function updateStatus(Request $request, $id)
     {
-        $response = Http::put("http://localhost:3001/api/sensors/{$id}", [
+        $response = Http::put("http://localhost:3000/PsycoWax/v1/sensorsxx/{$id}", [
             'activo' => $request->input('activo')
         ]);
 
@@ -245,7 +245,7 @@ class AuthController extends Controller {
     public function getUnacknowledged(Request $request)
     {
         $user_id = session('user._id');
-        $response = Http::get('http://localhost:3001/api/alerts/unacknowledged', [
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/alertsxx/unacknowledged', [
             'user_id' => $user_id // Asume autenticación de usuario
         ]);
 
@@ -261,7 +261,7 @@ class AuthController extends Controller {
     public function attendAlert(Request $request, $id)
     {
         $user_id = session('user._id');
-        $response = Http::put("http://localhost:3001/api/alerts/{$id}/attend", [
+        $response = Http::put("http://localhost:3000/PsycoWax/v1/alertsxx/{$id}/attend", [
             'atendida' => $request->atendida,
             'user_id' => $user_id // Verificación adicional de seguridad
         ]);

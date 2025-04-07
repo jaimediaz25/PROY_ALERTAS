@@ -159,7 +159,7 @@
                 <select name="rol" required>
                     <option value="usuario">Usuario</option>
                     <option value="admin">Administrador</option>
-                    <option value="bombero">Bombero</option>
+                   
                 </select>
                 <button type="submit" class="btn">Guardar</button>
             </form>

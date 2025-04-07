@@ -193,7 +193,10 @@
     font-size: 2em;
     margin-top: 5px;
 }
-
+.native-alert-icon2 {
+    font-size: 1em;
+    margin-top: 1px;
+}
 .native-alert-text {
     flex: 1;
 }
@@ -249,7 +252,7 @@
     position: fixed;
     top: 20px;
     right: 20px;
-    background: #ff4444;
+    background: #ffffff;
     color: white;
     padding: 15px 20px;
     border-radius: 6px;
@@ -489,9 +492,9 @@ function mostrarErrorAlerta(mensaje) {
     errorDialog.className = 'native-alert-error';
     errorDialog.innerHTML = `
         <div class="native-alert-content">
-            <div class="native-alert-icon">❌</div>
+            <div class="native-alert-icon2">❌</div>
             <div class="native-alert-text">
-                <p>${mensaje}</p>
+                <p>ERROR: No se ha podido recibir alertas</p>
             </div>
         </div>
     `;
@@ -507,7 +510,7 @@ function mostrarErrorAlerta(mensaje) {
     }
 
     // Configurar intervalos
-    setInterval(refreshData, 5000);
+    setInterval(refreshData, 10000);
     // Ejecutar inmediatamente al cargar
     document.addEventListener('DOMContentLoaded', refreshData);
   </script>

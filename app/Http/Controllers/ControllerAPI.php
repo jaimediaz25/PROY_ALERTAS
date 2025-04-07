@@ -20,7 +20,7 @@ class ControllerAPI extends Controller
     public function index(Request $request)
     {
         $perPage = 3; 
-        $response = Http::get('http://localhost:3001/api/users', [
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/usersxx', [
             'search' => $request->search,
             'page' => $request->page,
             'perPage' => $perPage 
@@ -61,7 +61,7 @@ class ControllerAPI extends Controller
         try {
             $response = Http::timeout(10)
                 ->withHeaders(['Content-Type' => 'application/json'])
-                ->post('http://localhost:3001/api/users', $validated);
+                ->post('http://localhost:3000/PsycoWax/v1/usersxx', $validated);
             if ($response->successful()) {
                 return redirect()->route('users.index')
                     ->with('success', 'Usuario registrado exitosamente');
@@ -89,7 +89,7 @@ class ControllerAPI extends Controller
         if (!Str::isUuid($id) && !preg_match('/^[a-f\d]{24}$/i', $id)) {
             abort(404);
         }
-        $response = Http::get("http://localhost:3001/api/users/{$id}");
+        $response = Http::get("http://localhost:3000/PsycoWax/v1/usersxx/{$id}");
         if (!$response->successful() || !isset($response->json()['_id'])) {
             return redirect()->route('users.index')->with('error', 'Usuario no encontrado');
         }
@@ -139,11 +139,11 @@ class ControllerAPI extends Controller
         'Accept' => 'application/json'
     ])
     ->timeout(90)
-    ->put("http://localhost:3001/api/users/{$id}", $data);
+    ->put("http://localhost:3000/PsycoWax/v1/usersxx/{$id}", $data);
 
     if ($response->successful()) {
         if (session('user._id') === $id) {
-            $updatedUser = Http::get("http://localhost:3001/api/users/{$id}")->json();
+            $updatedUser = Http::get("http://localhost:3000/PsycoWax/v1/usersxx/{$id}")->json();
             session()->put('user', $updatedUser);
         }
         return redirect()->route('users.index')->with('success', 'Usuario actualizado');
@@ -161,7 +161,7 @@ class ControllerAPI extends Controller
         if (!preg_match('/^[a-f\d]{24}$/i', $id)) {
             return back()->with('error', 'ID inválido');
         }
-        $response = Http::delete("http://localhost:3001/api/users/{$id}");
+        $response = Http::delete("http://localhost:3000/PsycoWax/v1/usersxx/{$id}");
         if ($response->successful()) {
             return redirect()->route('users.index')->with('success', 'Usuario eliminado');
         }
@@ -172,7 +172,7 @@ class ControllerAPI extends Controller
 
     public function exportPdf(Request $request)
     {
-        $response = Http::get('http://localhost:3001/api/users', [
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/usersxx', [
             'search' => $request->search,
             'perPage' => 1000 
         ]);
@@ -192,7 +192,7 @@ class ControllerAPI extends Controller
 
     public function exportExcel(Request $request)
     {
-        $response = Http::get('http://localhost:3001/api/users', [
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/usersxx', [
             'search' => $request->search
         ]);
         if (!$response->successful()) {
@@ -224,7 +224,7 @@ class ControllerAPI extends Controller
 
     public function showGraph()
     {
-        $response = Http::get('http://localhost:3001/api/users/stats/monthly');
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/usersxx/stats/monthly');
         if (!$response->successful()) {
             return redirect()->back()->with('error', 'Error al obtener datos de la API');
         }
@@ -289,7 +289,7 @@ class ControllerAPI extends Controller
                         $errors[] = "Fila ".($index + 1).": Edad inválida";
                         continue;
                     }
-                    $checkResponse = Http::get('http://localhost:3001/api/users/check-email', [
+                    $checkResponse = Http::get('http://localhost:3000/PsycoWax/v1/usersxx/check-email', [
                         'email' => $email 
                     ]);
                     if (!$checkResponse->successful()) {
@@ -301,7 +301,7 @@ class ControllerAPI extends Controller
                         continue;
                     }
                     $userData['password'] = bcrypt($userData['password']);
-                    $apiResponse = Http::post('http://localhost:3001/api/users', $userData);
+                    $apiResponse = Http::post('http://localhost:3000/PsycoWax/v1/usersxx', $userData);
                     if (!$apiResponse->successful()) {
                         $errorData = $apiResponse->json();
                         $errors[] = "Fila ".($index + 1).": ".($errorData['error'] ?? 'Error API');
@@ -333,7 +333,7 @@ class ControllerAPI extends Controller
     //CRUD de sensors
     public function indexsen(Request $request)
     {
-        $response = Http::get('http://localhost:3001/api/sensors');
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/sensorsxx');
         if (!$response->successful()) {
             return redirect()->back()->with('error', 'Error al obtener los sensores.');
         }
@@ -364,7 +364,7 @@ class ControllerAPI extends Controller
 
     public function storesen(Request $request)
     {
-        $response = Http::post('http://localhost:3001/api/sensors', $request->all());
+        $response = Http::post('http://localhost:3000/PsycoWax/v1/sensorsxx', $request->all());
         if ($response->successful()) {
             return redirect()->route('sensors.index')->with('success', 'Sensor creado exitosamente');
         }
@@ -374,7 +374,7 @@ class ControllerAPI extends Controller
 
     public function editsen($id)
     {
-        $response = Http::get("http://localhost:3001/api/sensors/{$id}");
+        $response = Http::get("http://localhost:3000/PsycoWax/v1/sensorsxx/{$id}");
         if ($response->successful()) {
             $sensor = $response->json();
             return view('sensors.edit', compact('sensor'));
@@ -385,7 +385,7 @@ class ControllerAPI extends Controller
 
     public function updatesen(Request $request, $id)
     {
-        $response = Http::put("http://localhost:3001/api/sensors/{$id}", $request->all());
+        $response = Http::put("http://localhost:3000/PsycoWax/v1/sensorsxx/{$id}", $request->all());
         if ($response->successful()) {
             return redirect()->route($request->input('redirect_to'))->with('success', 'Sensor actualizado correctamente');
         }
@@ -395,7 +395,7 @@ class ControllerAPI extends Controller
 
     public function destroysen($id)
     {
-        $response = Http::delete("http://localhost:3001/api/sensors/{$id}");
+        $response = Http::delete("http://localhost:3000/PsycoWax/v1/sensorsxx/{$id}");
         if ($response->successful()) {
             return redirect()->route('sensors.index')->with('success', 'Sensor eliminado correctamente');
             
@@ -406,7 +406,7 @@ class ControllerAPI extends Controller
 
     public function exportPdfsen(Request $request) 
     {
-        $response = Http::get('http://localhost:3001/api/sensors');
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/sensorsxx');
         if (!$response->successful()) {
             return redirect()->back()->with('error', 'Error al obtener los sensores.');
         }
@@ -425,7 +425,7 @@ class ControllerAPI extends Controller
 
     public function exportExcelsen(Request $request)
     {
-        $response = Http::get('http://localhost:3001/api/sensors'); 
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/sensorsxx'); 
         if (!$response->successful()) {
             return redirect()->back()->with('error', 'Error al obtener los sensores desde la API.');
         }
@@ -451,7 +451,7 @@ class ControllerAPI extends Controller
     
     public function showGraphsen()
     {
-        $response = Http::get('http://localhost:3001/api/sensors/stats/monthly');
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/sensorsxx/stats/monthly');
         if (!$response->successful()) {
             return redirect()->back()->with('error', 'Error al obtener datos de sensores');
         }
@@ -524,7 +524,7 @@ class ControllerAPI extends Controller
                         continue;
                     }
                     $sensorData['activo'] = (bool) intval($valorActivo);
-                    $checkResponse = Http::get('http://localhost:3001/api/sensors/check', [
+                    $checkResponse = Http::get('http://localhost:3000/PsycoWax/v1/sensorsxx/check', [
                         'ubicacion' => $sensorData['ubicacion'],
                         'tipo' => $sensorData['tipo']
                     ]);
@@ -536,7 +536,7 @@ class ControllerAPI extends Controller
                         $errors[] = "Fila ".($index + 1).": Sensor ya existe para este usuario";
                         continue;
                     }
-                    $apiResponse = Http::post('http://localhost:3001/api/sensors', $sensorData);
+                    $apiResponse = Http::post('http://localhost:3000/PsycoWax/v1/sensorsxx', $sensorData);
                     if (!$apiResponse->successful()) {
                         $errorData = $apiResponse->json();
                         $errors[] = "Fila ".($index + 1).": ".($errorData['error'] ?? 'Error desconocido');
@@ -569,7 +569,7 @@ class ControllerAPI extends Controller
     //CRUD de readings
     public function indexre(Request $request)
     {
-        $response = Http::get('http://localhost:3001/api/readings');
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/readingsxx');
         if (!$response->successful()) {
             return redirect()->back()->with('error', 'Error al obtener las lecturas.');
         }
@@ -600,7 +600,7 @@ class ControllerAPI extends Controller
 
     public function storere(Request $request)
     {
-        $response = Http::post('http://localhost:3001/api/readings', $request->all());
+        $response = Http::post('http://localhost:3000/PsycoWax/v1/readingsxx', $request->all());
         if ($response->successful()) {
             return redirect()->route('readings.index')->with('success', 'Reading creado exitosamente');
         }
@@ -610,7 +610,7 @@ class ControllerAPI extends Controller
 
     public function editre($id)
     {
-        $response = Http::get("http://localhost:3001/api/readings/{$id}");
+        $response = Http::get("http://localhost:3000/PsycoWax/v1/readingsxx/{$id}");
         if ($response->successful()) {
             $reading = $response->json();
             return view('readings.edit', compact('reading'));
@@ -621,7 +621,7 @@ class ControllerAPI extends Controller
 
     public function updatere(Request $request, $id)
     {
-        $response = Http::put("http://localhost:3001/api/readings/{$id}", $request->all());
+        $response = Http::put("http://localhost:3000/PsycoWax/v1/readingsxx/{$id}", $request->all());
         if ($response->successful()) {
             return redirect()->route('readings.index')->with('success', 'Reading actualizado correctamente');
         }
@@ -631,7 +631,7 @@ class ControllerAPI extends Controller
 
     public function destroyre($id)
     {
-        $response = Http::delete("http://localhost:3001/api/readings/{$id}");
+        $response = Http::delete("http://localhost:3000/PsycoWax/v1/readingsxx/{$id}");
         if ($response->successful()) {
             return redirect()->route('readings.index')->with('success', 'Reading eliminado correctamente');
         }
@@ -641,7 +641,7 @@ class ControllerAPI extends Controller
 
     public function exportPdfre(Request $request)
     {
-        $response = Http::get('http://localhost:3001/api/readings'); 
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/readingsxx'); 
         if (!$response->successful()) {
             return redirect()->back()->with('error', 'Error al obtener las lecturas.');
         }
@@ -661,7 +661,7 @@ class ControllerAPI extends Controller
 
     public function exportExcelre(Request $request)
     {
-        $response = Http::get('http://localhost:3001/api/readings'); 
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/readingsxx'); 
         if (!$response->successful()) {
             return redirect()->back()->with('error', 'Error al obtener las lecturas.');
         }
@@ -686,7 +686,7 @@ class ControllerAPI extends Controller
     
     public function showGraphre()
     {
-        $response = Http::get('http://localhost:3001/api/readings/stats/monthly');
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/readingsxx/stats/monthly');
         if (!$response->successful()) {
             return redirect()->back()->with('error', 'Error al obtener datos de lecturas');
         }
@@ -746,7 +746,7 @@ class ControllerAPI extends Controller
                         continue;
                     }
                     
-                    $checkSensor = Http::get("http://localhost:3001/api/sensors/{$sensor_id}");
+                    $checkSensor = Http::get("http://localhost:3000/PsycoWax/v1/sensorsxx/{$sensor_id}");
                     if (!$checkSensor->successful()) {
                         $errors[] = "Fila ".($index + 1).": Error verificando sensor";
                         continue;
@@ -755,7 +755,7 @@ class ControllerAPI extends Controller
                         $errors[] = "Fila ".($index + 1).": Sensor no existe";
                         continue;
                     }
-                    $response = Http::post('http://localhost:3001/api/readings', [
+                    $response = Http::post('http://localhost:3000/PsycoWax/v1/readingsxx', [
                         'sensor_id' => $sensor_id,
                         'valor' => $valor
                     ]);
@@ -790,7 +790,7 @@ class ControllerAPI extends Controller
     //CRUD de alerts
     public function indexalerts(Request $request)
     {
-        $response = Http::get('http://localhost:3001/api/alerts');
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/alertsxx');
         if (!$response->successful()) {
             return redirect()->back()->with('error', 'Error al obtener las alertas.');
         }
@@ -821,7 +821,7 @@ class ControllerAPI extends Controller
 
     public function storeAlert(Request $request)
     {
-        $response = Http::post('http://localhost:3001/api/alerts', $request->all());
+        $response = Http::post('http://localhost:3000/PsycoWax/v1/alertsxx', $request->all());
         if ($response->successful()) {
             return redirect()->route('alerts.index')->with('success', 'Alerta creada correctamente');
         }
@@ -831,7 +831,7 @@ class ControllerAPI extends Controller
 
     public function editAlert($id)
     {
-        $response = Http::get("http://localhost:3001/api/alerts/{$id}");
+        $response = Http::get("http://localhost:3000/PsycoWax/v1/alertsxx/{$id}");
         if ($response->successful()) {
             $alert = $response->json();
             return view('alerts.edit', compact('alert'));
@@ -842,7 +842,7 @@ class ControllerAPI extends Controller
 
     public function updateAlert(Request $request, $id)
     {
-        $response = Http::put("http://localhost:3001/api/alerts/{$id}", $request->all());
+        $response = Http::put("http://localhost:3000/PsycoWax/v1/alertsxx/{$id}", $request->all());
         if ($response->successful()) {
             return redirect()->route('alerts.index')->with('success', 'Alerta actualizada correctamente');
         }
@@ -852,7 +852,7 @@ class ControllerAPI extends Controller
 
     public function destroyAlert($id)
     {
-        $response = Http::delete("http://localhost:3001/api/alerts/{$id}");
+        $response = Http::delete("http://localhost:3000/PsycoWax/v1/alertsxx/{$id}");
         if ($response->successful()) {
             return redirect()->route('alerts.index')->with('success', 'Alerta eliminada correctamente');
         }
@@ -862,7 +862,7 @@ class ControllerAPI extends Controller
 
     public function exportPdfAlert(Request $request)
     {
-        $response = Http::get('http://localhost:3001/api/alerts');
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/alertsxx');
         if (!$response->successful()) {
             return redirect()->back()->with('error', 'Error al obtener las alertas.');
         }
@@ -884,7 +884,7 @@ class ControllerAPI extends Controller
 
     public function exportExcelAlert(Request $request)
     {
-        $response = Http::get('http://localhost:3001/api/alerts');
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/alertsxx');
         if (!$response->successful()) {
             return redirect()->back()->with('error', 'Error al obtener las alertas.');
         }
@@ -910,7 +910,7 @@ class ControllerAPI extends Controller
 
     public function showGraphAlert()
     {
-        $response = Http::get('http://localhost:3001/api/alerts/stats/monthly');
+        $response = Http::get('http://localhost:3000/PsycoWax/v1/alertsxx/stats/monthly');
         if (!$response->successful()) {
             return redirect()->back()->with('error', 'Error al obtener datos de alertas');
         }
@@ -978,8 +978,8 @@ class ControllerAPI extends Controller
                         $errors[] = "Fila ".($index + 1).": ID inválido";
                         continue;
                     }
-                    $sensorCheck = Http::get("http://localhost:3001/api/sensors/{$alertData['sensor_id']}");
-                    $userCheck = Http::get("http://localhost:3001/api/users/{$alertData['user_id']}");
+                    $sensorCheck = Http::get("http://localhost:3000/PsycoWax/v1/sensorsxx/{$alertData['sensor_id']}");
+                    $userCheck = Http::get("http://localhost:3000/PsycoWax/v1/usersxx/{$alertData['user_id']}");
                     if (!$sensorCheck->successful()) {
                         $errors[] = "Fila ".($index + 1).": Sensor no encontrado";
                         continue;
@@ -994,7 +994,7 @@ class ControllerAPI extends Controller
                     }
                     $alertData['atendida'] = (bool)$alertData['atendida'];
                     $alertData['generado_en'] = \Carbon\Carbon::parse($alertData['generado_en'])->toIso8601String();
-                    $checkResponse = Http::get('http://localhost:3001/api/alerts/check', [
+                    $checkResponse = Http::get('http://localhost:3000/PsycoWax/v1/alertsxx/check', [
                         'sensor_id' => $alertData['sensor_id'],
                         'user_id' => $alertData['user_id'],
                         'generado_en' => $alertData['generado_en']
@@ -1003,7 +1003,7 @@ class ControllerAPI extends Controller
                         $errors[] = "Fila ".($index + 1).": Alerta duplicada";
                         continue;
                     }
-                    $apiResponse = Http::post('http://localhost:3001/api/alerts', $alertData);
+                    $apiResponse = Http::post('http://localhost:3000/PsycoWax/v1/alertsxx', $alertData);
                     if (!$apiResponse->successful()) {
                         $errorData = $apiResponse->json();
                         $errors[] = "Fila ".($index + 1).": ".($errorData['error'] ?? 'Error API');
